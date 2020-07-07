@@ -1,0 +1,3 @@
+Metodos 
+
+INDEX, Store, Update, SHOW, DELETE
