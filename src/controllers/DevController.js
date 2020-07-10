@@ -26,28 +26,44 @@ module.exports = {
 
         const userExists = await Dev.findOne({ user: { $regex: `^${username}$`, $options: 'i' } });
 
+
+
         if (userExists) {
             return res.json(userExists);
         }
 
         await axios.get(`https://api.github.com/users/${username}`)
             .then(async (response) => {
+
                 const { name, bio, avatar_url: avatar } = response.data;
+
                 if (response.data.name) {
+
                     const dev = await Dev.create({
                         name,
                         user: username,
                         bio,
                         avatar
+                    }).catch(resp => {
+                        return res.status(400).json({ error: 'server internal error ' })
                     })
+
+                    for (var [key, value] of Object.entries(req.connectedUsers)) {
+                        if (key !== username) {
+                            if (value) {
+                                req.io.to(value).emit('newdev', dev);
+                            }
+                        }
+                    }
                     return res.json(dev);
-                }else{
+
+                } else {
                     return res.status(406).json({ error: 'user with invalid name' });
                 }
             }).catch(error => {
                 return res.status(404).json({ error: 'user does´t exist' });
             })
-       
+
 
     }
 }

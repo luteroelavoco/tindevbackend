@@ -25,7 +25,6 @@ mongoose.connect(`mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@clus
 app.use((req, res, next) =>{
     req.io = io;
     req.connectedUsers = connectedUsers;
-
     return next();
 })
 
